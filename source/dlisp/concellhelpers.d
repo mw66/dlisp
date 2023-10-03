@@ -25,7 +25,9 @@
 module dlisp.concellhelpers;
 
 private {
+  import core.stdc.math;
   import std.conv;
+  import std.exception;
   import std.math;
   import std.string;
   
@@ -34,7 +36,7 @@ private {
 
 public {
   
-  char[] cellToString(Cell* cell, bool list = false, bool quotestr = true) {
+  string cellToString(Cell* cell, bool list = false, bool quotestr = true) {
     if (!cell) {
       return "NIL";
     }
@@ -43,10 +45,10 @@ public {
         return cell.name;
         break;
       case CellType.ctINT:
-        return toString(cell.intValue);
+        return to!string(cell.intValue);
         break;
       case CellType.ctFLOAT:
-        return toString(cell.floatValue);
+        return to!string(cell.floatValue);
         break;
       case CellType.ctSTR:
         if (quotestr) {
@@ -56,10 +58,10 @@ public {
         }
         break;
       case CellType.ctBINT:
-        return "[" ~ toString(*cell.pintValue) ~ "]";
+        return "[" ~ to!string(*cell.pintValue) ~ "]";
         break;
       case CellType.ctBFLOAT:
-        return "[" ~ toString(*cell.pfloatValue) ~ "]";
+        return "[" ~ to!string(*cell.pfloatValue) ~ "]";
         break;
       case CellType.ctBSTR:
         if (quotestr) {
@@ -72,7 +74,7 @@ public {
         return "<Stream>";
         break;
       case CellType.ctCONS:
-        char[] tmp;
+        string tmp;
         if (isSym(cell.car) && cell.car.name == "BACK-QUOTE") {
           tmp = "`" ~ cellToString(cell.cdr.car, list, quotestr);
         } else if (isSym(cell.car) && cell.car.name == "COMMA-QUOTE") {
@@ -106,7 +108,10 @@ public {
       case CellType.ctPREDEF:
         return "<Predefined " ~ (cell.ismacro ? "macro" : "function") ~ ": " ~ cell.name ~ ">";
         break;
+      default: enforce(false, "svn code bug!");
     }
+    enforce(false, "svn code bug!");
+    return null;
   }
   
   int cellToInt(Cell* cell) {
@@ -121,10 +126,10 @@ public {
         return cast(int)cell.floatValue;
         break;
       case CellType.ctSTR:
-        return toInt(cell.strValue);
+        return to!int(cell.strValue);
         break;
       default:
-        throw new ConvError("Incompatible cell-type for converting to integer.");
+        throw new std.conv.ConvException("Incompatible cell-type for converting to integer.");
         break;
     }
   }
@@ -141,10 +146,10 @@ public {
         return cell.floatValue;
         break;
       case CellType.ctSTR:
-        return toReal(cell.strValue);
+        return to!real(cell.strValue);
         break;
       default:
-        throw new ConvError("Incompatible cell-type for converting to float.");
+        throw new std.conv.ConvException("Incompatible cell-type for converting to float.");
         break;
     }
   }
@@ -160,7 +165,7 @@ public {
         case CellType.ctINT:
           return cell.intValue != 0;
         case CellType.ctFLOAT:
-          return cell.floatValue != 0.0 && !isnan(cell.floatValue);
+          return cell.floatValue != 0.0 && !core.stdc.math.isnan(cell.floatValue);
         case CellType.ctSTR:
           return cell.strValue.length > 0;
         case CellType.ctSTREAM:
@@ -448,7 +453,7 @@ public {
     return ret;
   }
   
-  Cell* newSymList(char[][] names) {
+  Cell* newSymList(string[] names) {
     if (names.length == 0) {
       return null;
     } else {
@@ -456,7 +461,7 @@ public {
     }
   }
   
-  Cell* newStrList(char[][] strs) {
+  Cell* newStrList(string[] strs) {
     if (strs.length == 0) {
       return null;
     } else {

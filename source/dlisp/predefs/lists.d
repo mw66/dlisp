@@ -105,7 +105,7 @@ public {
   Cell* evalList(DLisp dlisp, Cell* cell) {
     Cell*[] args = evalArgs(dlisp, ".*", cell.cdr);
     Cell* ret = null;
-    for (int i = args.length - 1; i >= 0; i--) {
+    for (int i = cast(int)args.length - 1; i >= 0; i--) {
       ret = newCons(args[i], ret);
     }
     return ret;
@@ -150,7 +150,7 @@ public {
     if (args.length == 0) {
       return null;
     } else {
-      uint cnt = args.length - 1;
+      int cnt = cast(int)args.length - 1;
       Cell* ret = args[cnt];
       while (cnt) {
         cnt--;

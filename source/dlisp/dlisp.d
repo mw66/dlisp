@@ -25,6 +25,8 @@
 module dlisp.dlisp;
 
 public {
+  import std.conv;
+
   import dlisp.concell;
   import dlisp.concellhelpers;
   import dlisp.environment;
@@ -45,8 +47,8 @@ public class DLisp {
     
     public {
       
-      char[] versionString() {
-        return "dLISP environment v" ~ toString(versionReal()) ~ " (" ~ std.string.toString(Cell.sizeof) ~ ")";
+      string versionString() {
+        return "dLISP environment v" ~ to!string(versionReal()) ~ " (" ~ to!string(Cell.sizeof) ~ ")";
       }
           
       float versionReal() {
@@ -69,4 +71,6 @@ public class DLisp {
 
     }
   
-  }
+  uint conscount = 0;
+  uint atomcount = 0;
+}

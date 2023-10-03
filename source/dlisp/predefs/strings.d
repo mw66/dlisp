@@ -25,6 +25,7 @@
 module dlisp.predefs.strings;
 
 private {
+  import std.exception;
   import std.math;
   import std.string;
   
@@ -36,8 +37,8 @@ public {
   
   Cell* evalToString(DLisp dlisp, Cell* cell) {
     Cell*[] args = evalArgs(dlisp, ".+", cell.cdr);
-    char[] ret = "";
-    char[] sep;
+    string ret = "";
+    string sep;
     if (cell.car.name == "TOSTRING") {
       sep = dlisp.eval(newSym("*SEP*")).strValue;
     }
@@ -52,7 +53,7 @@ public {
 
   Cell* evalToChars(DLisp dlisp, Cell* cell) {
     Cell*[] args = evalArgs(dlisp, "s", cell.cdr);
-    Cell* makeCell(char[] source) {
+    Cell* makeCell(string source) {
       if (source.length == 0) {
         return null;
       } else {
@@ -64,24 +65,24 @@ public {
 
   Cell* evalSplit(DLisp dlisp, Cell* cell) {
     Cell*[] args = evalArgs(dlisp, "ss?", cell.cdr);
-    char[] sep = dlisp.eval(newSym("*SEP*")).strValue;
-    char[] delim = (args.length == 2) ? args[1].strValue : sep;
+    string sep = dlisp.eval(newSym("*SEP*")).strValue;
+    string delim = (args.length == 2) ? args[1].strValue : sep;
     return newStrList(split(args[0].strValue, delim));
   }
   
   Cell* evalLeft(DLisp dlisp, Cell* cell) {
     Cell*[] args = evalArgs(dlisp, "is", cell.cdr);
-    return newStr(args[1].strValue[0..min(args[0].intValue, args[1].strValue.length)]);
+    return newStr(args[1].strValue[0..min(args[0].intValue, cast(int)args[1].strValue.length)]);
   }
 
   Cell* evalRight(DLisp dlisp, Cell* cell) {
     Cell*[] args = evalArgs(dlisp, "is", cell.cdr);
-    return newStr(args[1].strValue[max($ - args[0].intValue, 0)..$]);
+    return newStr(args[1].strValue[max(cast(int)($ - args[0].intValue), 0)..$]);
   }
   
   Cell* evalSubString(DLisp dlisp, Cell* cell) {
     Cell*[] args = evalArgs(dlisp, "ii?s", cell.cdr);
-    char[] str;
+    string str;
     int index = max(args[0].intValue, 0), count = int.max;
     if (args.length == 3) {
       count = args[1].intValue;
@@ -89,8 +90,8 @@ public {
     } else {
       str = args[1].strValue;
     }
-    index = min(index, str.length);
-    count = min(max(count, 0), str.length - index);
+    index = min(index, cast(int)str.length);
+    count = min(max(count, 0), cast(int)str.length - index);
     return newStr(str[index..(index + count)]);
   }
 
@@ -101,21 +102,24 @@ public {
         return newStr(strip(args[0].strValue));
         break;
       case "TRIM-LEFT":
-        return newStr(stripl(args[0].strValue));
+        return newStr(stripLeft(args[0].strValue));
         break;
       case "TRIM-RIGHT":
-        return newStr(stripr(args[0].strValue));
+        return newStr(stripRight(args[0].strValue));
         break;
       case "UPPER":
-        return newStr(toupper(args[0].strValue));
+        return newStr(toUpper(args[0].strValue));
         break;
       case "LOWER":
-        return newStr(tolower(args[0].strValue));
+        return newStr(toLower(args[0].strValue));
         break;
       case "LENGTH":
-        return newInt(args[0].strValue.length);
+        return newInt(cast(int)args[0].strValue.length);
         break;
+      default: enforce(false, "svn code bug!");
     }
+    enforce(false, "svn code bug!");
+    return null;
   }
   
 }

@@ -27,44 +27,44 @@ module dlisp.environment;
 private {
   import std.math;
   import std.string;
-  import std.cstream;
+  import undead.cstream;
 
   import dlisp.dlisp;
 }
 
 public class Environment {
-  private Cell*[char[]] _globals;
-  private Cell*[char[]][] _restore;
-  private char[][][] _remove;
+  private Cell*[string] _globals;
+  private Cell*[string][] _restore;
+  private string[][] _remove;
   
   public {
 
     this() {
     }
     
-    void bindPredef(char[] name, PredefFunc func, char[] docs = "", bool ismacro = false) {
+    void bindPredef(string name, PredefFunc func, string docs = "", bool ismacro = false) {
       this[name] = newPredef(name, func, docs, ismacro);
     }
     
-    void bindValue(char[] name, int* pointer) {
+    void bindValue(string name, int* pointer) {
       this[name] = newBoundInt(pointer);
     }
 
-    void bindValue(char[] name, real* pointer) {
+    void bindValue(string name, real* pointer) {
       this[name] = newBoundFloat(pointer);
     }
     
-    void bindValue(char[] name, char[]* pointer) {
+    void bindValue(string name, string* pointer) {
       this[name] = newBoundStr(pointer);
     }
     
-    void clonePredef(char[] name, char[] newname) {
-      this[newname] = this[name.toupper()];
+    void clonePredef(string name, string newname) {
+      this[newname] = this[name.toUpper()];
     }
   
-    char[][] allFuncs() {
-      char[][] ret;
-      foreach (char[] key, Cell* cell; _globals) {
+    string[] allFuncs() {
+      string[] ret;
+      foreach (string key, Cell* cell; _globals) {
         if (isFunc(cell)) {
           if (cell.docs != "") {
             ret ~= cell.name;
@@ -74,11 +74,11 @@ public class Environment {
       return ret;
     }
         
-    bool isBound(char[] key) {
+    bool isBound(string key) {
       return (key in _globals) != null;
     }
     
-    void unbind(char[] key) {
+    void unbind(string key) {
       if (!isBound(key)) {
         throw new Exception("Unbound symbol: " ~ key);
       }
@@ -89,7 +89,7 @@ public class Environment {
       this._globals.rehash;
     }
     
-    void addLocal(char[] key, Cell* value) {  
+    void addLocal(string key, Cell* value) {  
       Cell** tcell = key in _globals;
       if (tcell) {
         _restore[_restore.length - 1][key] = *tcell;
@@ -108,25 +108,25 @@ public class Environment {
       if (_restore.length == 0) {
         throw new Exception("Local stack is empty");
       }
-      foreach(char[] key, Cell* cell; _restore[_restore.length - 1]) {
+      foreach(string key, Cell* cell; _restore[_restore.length - 1]) {
         _globals[key] = cell;
       }
-      foreach(char[] key; _remove[_remove.length - 1]) {
+      foreach(string key; _remove[_remove.length - 1]) {
         _globals.remove(key);
       }
       _restore.length = _restore.length - 1;
       _remove.length = _remove.length - 1;  
     }
     
-    Cell* opIndex(char[] key) {
+    Cell* opIndex(string key) {
       if (!isBound(key)) {
         throw new Exception("Unbound symbol: " ~ key);
       }
       return _globals[key];
     }
 
-    Cell* opIndexAssign(Cell* value, char[] key) {
-      _globals[key.toupper()] = value;
+    Cell* opIndexAssign(Cell* value, string key) {
+      _globals[key.toUpper()] = value;
       return value;
     }
 
@@ -136,4 +136,5 @@ public class Environment {
 
 public Environment addToEnvironment(Environment environment) {
   environment = new Environment();
+  return environment;
 }

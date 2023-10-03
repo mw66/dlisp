@@ -25,28 +25,30 @@
 module dlisp.evaluator;
 
 private {
-  import std.stdio;
-  import std.string;
 }
 
 public template Evaluator() {
   
   public {
+  import std.range;
+  import std.stdio;
+  import std.string;
+  import std.exception;
     
-    bool[char[]] tracefuncs;
+    bool[string] tracefuncs;
     uint evalcount = 0;
     uint tracetabs = 2;
     uint allowLists = 0;
     
     uint tracelevel = 0;
     
-    void addTrace(char[] name) {
+    void addTrace(string name) {
       if (!(name in tracefuncs)) {
         tracefuncs[name] = true;
       }
     }
     
-    void removeTrace(char[] name) {
+    void removeTrace(string name) {
       if (name in tracefuncs) {
         tracefuncs.remove(name);
       } 
@@ -65,6 +67,7 @@ public template Evaluator() {
             return newFloat(*cell.pfloatValue);
           case CellType.ctBSTR:
             return newStr(*cell.pstrValue);        
+	  default: enforce(false, "svn code bug!");
         }
       }
       if (cell.cellType == CellType.ctSYM) {
@@ -80,7 +83,7 @@ public template Evaluator() {
         }
       }
       Cell* func = eval(cell.car);
-      char[] name = cell.car.name;
+      string name = cell.car.name;
       switch (func.cellType) {
         case CellType.ctFUNC:
           // Lots of magic!!!
@@ -96,7 +99,7 @@ public template Evaluator() {
               tracelevel +=tracetabs;
             }
             bool isoptional = false;
-            char[] isrest = "";
+            string isrest = "";
             while (args) {
               if (args.car.name == "&OPTIONAL" ) {
                 isoptional = true;
@@ -104,7 +107,7 @@ public template Evaluator() {
                 args = args.cdr;
                 isrest = args.car.name;
               } else {
-                char[] name;
+                // string name;
                 if (params) {
                   if (ismacro) {
                     cell = params.car;
@@ -157,7 +160,7 @@ public template Evaluator() {
               }
             }
             if (dotrace) {
-              writefln(repeat(" ", tracelevel), "Trace ", name, " in: ", cellToString(parms));
+              writefln(replicate(" ", tracelevel), "Trace ", name, " in: ", cellToString(parms));
             }
             func = func.car;
             while (func) {
@@ -186,7 +189,7 @@ public template Evaluator() {
           }
 */      }
       if (name in tracefuncs) {
-        writefln(repeat(" ", tracelevel), "Trace ", name, " out: ", cellToString(cell));
+        writefln(replicate(" ", tracelevel), "Trace ", name, " out: ", cellToString(cell));
         tracelevel -= tracetabs;
       }
       return cell;

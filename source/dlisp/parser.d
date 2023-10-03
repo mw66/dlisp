@@ -28,18 +28,21 @@ module dlisp.parser;
 public template Parser() {
   
   private {
-    import std.stream;
+    import undead.stream;
     import std.stdio;
     import std.string;
     import std.conv;
+    import std.regex;
+    import std.uni;
+
     import dlisp.dlisp;
     import dlisp.types;
   }
   
   public {
     
-    Cell* parse(char[] source) {
-      return parse(new MemoryStream(source));
+    Cell* parse(string source) {
+      return parse(new MemoryStream(cast(char[])source));
     }
     
     // Workaround for bug?
@@ -69,7 +72,7 @@ public template Parser() {
       }
       
       void skipWhite(bool noconsume = false) {
-        if (noconsume && !std.string.iswhite(ch) && ch != ';')
+        if (noconsume && !std.uni.isWhite(ch) && ch != ';')
           return;
         do {
           nextch();
@@ -78,12 +81,12 @@ public template Parser() {
               nextch();
             } while (ch != '\n' && ch != '\r');
           }
-        } while(std.string.iswhite(ch));
+        } while(std.uni.isWhite(ch));
       }
       
       Cell* parseAtom(bool havech) {
         Pos _pos = pos;
-        char[] tmp = "";
+        char[] tmp = [];
         if (!havech)
           skipWhite();
         if (ch == '"') {
@@ -98,9 +101,9 @@ public template Parser() {
             tmp ~= ch;
           }
           nextch();
-          return newStr(tmp, _pos);
+          return newStr(cast(string)tmp, _pos);
         } else { 
-          while (inPattern(ch, "a-zA-Z0-9-") || inPattern(ch, "_.!@$&+*%/><='~^")) {
+          while (matchFirst([ch], regex("[a-zA-Z0-9-]")) || matchFirst([ch], regex("[_.!@$&+*%/><='~^]"))) {
             tmp ~= ch;
             nextch();
           }
@@ -108,13 +111,13 @@ public template Parser() {
             throw new ParseState("Unexpected character in parse stream", pos);
           }
           try {
-            if (find(tmp, ".") == -1) {
-              return newInt(toInt(tmp), _pos);
+            if (indexOf(tmp, ".") == -1) {
+              return newInt(to!int(tmp), _pos);
             } else {
-              return newFloat(toReal(tmp), _pos);
+              return newFloat(to!real(tmp), _pos);
             }
-          } catch (ConvError e) {
-            return newSym(tmp, _pos);
+          } catch (std.conv.ConvException e) {
+            return newSym(cast(string)tmp, _pos);
           }
         }
       }
@@ -195,8 +198,8 @@ public template Parser() {
       return ret;
     }
     
-    Cell* parseEvalPrint(char[] source, bool silent = false) {
-      return parseEvalPrint(new MemoryStream(source), silent);
+    Cell* parseEvalPrint(string source, bool silent = false) {
+      return parseEvalPrint(new MemoryStream(cast(char[])source), silent);
     }
     
     Cell* parseEvalPrint(Stream stream, bool silent = false) {

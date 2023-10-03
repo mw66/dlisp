@@ -25,9 +25,9 @@
 module dlisp.predefs.core;
 
 private {
-  import std.date;
+  import undead.date;
   import std.stdio;
-  import std.stream;
+  import undead.stream;
   import std.string;
   
   import dlisp.evalhelpers;
@@ -40,7 +40,7 @@ public {
     Cell*[] args = evalArgs(dlisp, "sb?", cell.cdr);
     try {
       bool silent = args.length > 1 ? isTrue(args[1]) : false;
-      dlisp.parseEvalPrint(new File(args[0].strValue), silent);
+      dlisp.parseEvalPrint(new undead.stream.File(args[0].strValue), silent);
     } catch (Exception e) {
       throw new FileState("Could not load " ~ args[0].strValue ~ " : " ~ e.toString());
     } finally {
@@ -55,8 +55,8 @@ public {
       return newStr(args[0].docs);
     } else {
       cell = null;
-      char[][] funcs = dlisp.environment.allFuncs();
-      foreach(char[] func; funcs) {
+      string[] funcs = dlisp.environment.allFuncs();
+      foreach(string func; funcs) {
         cell = appendToList(cell, newStr(func));
       }
       return cell;
@@ -84,7 +84,7 @@ public {
       return cell.cdr;
     } else {
       Cell* ret = newSymList(dlisp.tracefuncs.keys);
-      foreach(char[] key; dlisp.tracefuncs.keys) {
+      foreach(string key; dlisp.tracefuncs.keys) {
         dlisp.tracefuncs.remove(key);
       }
       return ret;
@@ -99,7 +99,7 @@ public {
     dlisp.atomcount = 0;
     cell = dlisp.eval(args[0]);
     writefln("; Evaluation took: %.3f seconds.", cast(real)(getUTCtime() - start) / TicksPerSecond);
-    writefln(";   %d conses and %d atoms in %dkb allocated.", conscount, atomcount, ((conscount + atomcount) * 28) / 1024);
+    writefln(";   %d conses and %d atoms in %dkb allocated.", dlisp.conscount, dlisp.atomcount, ((dlisp.conscount + dlisp.atomcount) * 28) / 1024);
     return cell;
   }
   
@@ -160,7 +160,7 @@ public {
   
   Cell* evalDefun(DLisp dlisp, Cell* cell) {
     Cell*[] args = evalArgs(dlisp, "'y'l's?'.+", cell.cdr);
-    char[] docs = "";
+    string docs = "";
     Cell* fbody;
     if (args.length > 3) {
       docs = args[2].strValue;

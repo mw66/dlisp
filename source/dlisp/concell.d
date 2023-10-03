@@ -26,7 +26,7 @@ module dlisp.concell;
 
 private {
   import std.string;
-  import std.stream;
+  import undead.stream;
   
   import dlisp.types;  
   import dlisp.dlisp;
@@ -36,7 +36,7 @@ public {
   
   Cell* nil = null;
   
-  typedef Cell* function(DLisp, Cell*) PredefFunc;
+  alias Cell* function(DLisp, Cell*) PredefFunc;
   
   enum CellType {
     ctSYM, ctINT, ctFLOAT, ctSTR, 
@@ -46,20 +46,20 @@ public {
 
   struct Cell {
     CellType cellType;
-    char[] name;
+    string name;
     Pos pos;
     union {
       int intValue;         // ctINT
       int* pintValue;       // ctBINT
       real floatValue;      // ctFLOAT
       real* pfloatValue;    // ctBFLOAT
-      char[] strValue;      // ctSTR
-      char[]* pstrValue;    // ctBSTR
+      string strValue;      // ctSTR
+      string* pstrValue;    // ctBSTR
       Stream streamValue;   // ctSTREAM
       struct {              // ctCONS and ctFUNC, ctPREDEF
         bool ismacro;       // ctFUNC, ctPREDEF
         union {
-          char[] docs;      // ctFUNC, ctPREDEF
+          string docs;      // ctFUNC, ctPREDEF
           bool visited;
         }
         union {
@@ -72,9 +72,9 @@ public {
     }
   }
   
-  Cell* newSym(char[] name, bool nilsym = false) {
+  Cell* newSym(string name, bool nilsym = false) {
     atomcount++;
-    name = toupper(name);
+    name = toUpper(name);
     if (name != "NIL" || nilsym) {
       Cell* cell = new Cell;
       cell.cellType = CellType.ctSYM;
@@ -85,7 +85,7 @@ public {
     }
   }
   
-  Cell* newSym(char[] name, Pos pos) {
+  Cell* newSym(string name, Pos pos) {
     Cell* cell = newSym(name);
     if (cell) {
       cell.pos = pos;
@@ -146,7 +146,7 @@ public {
     return cell;
   }
   
-  Cell* newStr(char[] value) {
+  Cell* newStr(string value) {
     atomcount++;
     Cell* cell = new Cell;
     cell.cellType = CellType.ctSTR;
@@ -154,7 +154,7 @@ public {
     return cell;
   }
 
-  Cell* newBoundStr(char[]* value) {
+  Cell* newBoundStr(string* value) {
     atomcount++;
     Cell* cell = new Cell;
     cell.cellType = CellType.ctBSTR;
@@ -162,7 +162,7 @@ public {
     return cell;
   }
   
-  Cell* newStr(char[] value, Pos pos) {
+  Cell* newStr(string value, Pos pos) {
     Cell* cell = newStr(value);
     cell.pos = pos;
     return cell;
@@ -186,7 +186,7 @@ public {
     return cell;
   }
   
-  Cell* newFunc(Cell* car, Cell* cdr, char[] docs = "", char[] name = "") {
+  Cell* newFunc(Cell* car, Cell* cdr, string docs = "", string name = "") {
     conscount++;
     Cell* cell = new Cell;
     cell.cellType = CellType.ctFUNC;
@@ -197,8 +197,8 @@ public {
     return cell;
   }
   
-  Cell* newPredef(char[] name, PredefFunc func, char[] docs, bool ismacro = false) {
-    name = toupper(name);
+  Cell* newPredef(string name, PredefFunc func, string docs, bool ismacro = false) {
+    name = toUpper(name);
     Cell* cell = new Cell;
     cell.cellType = CellType.ctPREDEF;
     cell.name = name;

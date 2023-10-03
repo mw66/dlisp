@@ -27,8 +27,9 @@ module tlisp;
 private {
   import std.string;
   import dlisp.concell;
-  import dlisp.parse;
-  import dlisp.evaluate;
+  import dlisp.parser;
+  import dlisp.evaluator;
+
 }
 
 version(Windows) {
@@ -36,6 +37,9 @@ version(Windows) {
 } else {
   extern(C):
 }
+
+
+version(TODO) {
 
 int tl_init() {
   // More magic needed
@@ -54,4 +58,6 @@ Cell* tl_parse(char* source) {
 
 Cell* tl_eval(Cell* cell) {
   return eval(cell);
+}
+
 }

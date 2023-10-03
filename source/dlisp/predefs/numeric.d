@@ -28,6 +28,8 @@ module dlisp.predefs.numeric;
 private {
   import dlisp.evalhelpers;
   import dlisp.dlisp;
+
+  import std.exception;
   import std.conv;
   import std.math;
   import std.string;
@@ -54,7 +56,7 @@ public {
 
 private {
 
-  typedef Cell* function(Cell*, Cell*) OpFunc;
+  alias Cell* function(Cell*, Cell*) OpFunc;
   
   Cell* addCells(Cell* cella, Cell* cellb) {
     if (!isNumber(cella)) {
@@ -182,7 +184,7 @@ private {
   
   Cell* evalToType(DLisp dlisp, Cell* cell) {
     Cell*[] args = evalArgs(dlisp, ".", cell.cdr);
-    char[] typename;
+    string typename;
     switch (cell.car.name) {
       case "TOINT":
         typename = "integer";
@@ -190,6 +192,7 @@ private {
       case "TOFLOAT":
         typename = "float";
         break;
+      default: enforce(false, "svn code bug!");
     }
     switch (args[0].cellType) {
       case CellType.ctINT:
@@ -208,12 +211,12 @@ private {
         break;
       case CellType.ctSTR:
           try {
-            if (find(args[0].strValue, ".") == -1) {
-              return newInt(toInt(args[0].strValue));
+            if (indexOf(args[0].strValue, ".") == -1) {
+              return newInt(to!int(args[0].strValue));
             } else {
-              return newFloat(toReal(args[0].strValue));
+              return newFloat(to!real(args[0].strValue));
             }
-          } catch (ConvError e) {
+          } catch (std.conv.ConvException e) {
             throw new TypeState("Can not convert '" ~ args[0].strValue ~ "' to " ~ typename, args[0].pos);
           }
       default:

@@ -97,8 +97,8 @@ public {
 
 private {
   
-  typedef bool function(Cell*, Cell*) CmpNumb;
-  typedef bool function(Cell*) IsType;
+  alias bool function(Cell*, Cell*) CmpNumb;
+  alias bool function(Cell*) IsType;
   
   
   bool eqnCells(Cell* cella, Cell* cellb) {

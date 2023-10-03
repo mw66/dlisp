@@ -24,7 +24,7 @@
 
 module dle;
 
-import std.cstream;
+import undead.cstream;
 import dlisp.concell;
 import dlisp.dlisp;
 import dlisp.predefs.all;
@@ -32,14 +32,14 @@ import dlisp.predefs.all;
 int main(char[][] args) {
   DLisp dlisp = new DLisp(addAllToEnvironment(new Environment()));
   
-  Cell* cell = dlisp.parseEvalPrint(`(LOAD "system.lisp" T)`, true);
-//  cell = dlisp.parseEvalPrint(`(read-eval-print-loop)`, true);
+  Cell* top_cell = dlisp.parseEvalPrint(`(LOAD "system.lisp" T)`.dup, true);
+//  top_cell = dlisp.parseEvalPrint(`(read-eval-print-loop)`, true);
 
 
   int inputcount = 0;
-  char[] inputprompt = "> ";
-  char[] input;
-  char[] resultprompt = "=> ";
+  string inputprompt = "> ";
+  string input;
+  string resultprompt = "=> ";
   dlisp.environment.bindValue("*input-count*", &inputcount);
   dlisp.environment.bindValue("*input-prompt*", &inputprompt);
   dlisp.environment.bindValue("*input-string*", &input);
@@ -49,7 +49,7 @@ int main(char[][] args) {
   
   while(1) {
     dout.writeString(inputprompt);
-    input = din.readLine();
+    input = cast(string)din.readLine();
     inputcount++;
     if (input != "") {
       if (input == "quit") 

@@ -25,6 +25,8 @@
 module dlisp.predefs.variables;
 
 private {
+  import std.exception;
+
   import dlisp.evalhelpers;
   import dlisp.dlisp;
 }
@@ -44,7 +46,7 @@ public {
   Cell* evalSet(DLisp dlisp, Cell* cell) {
     Cell*[] args = evalArgs(dlisp, "('y'.)+", cell.cdr);
     for(int i = 0; i < args.length; i += 2) {
-      char[] name = args[i].name;
+      string name = args[i].name;
       cell = dlisp.eval(args[i + 1]);
       //dlisp.environment[name] = cell;
       Environment e = dlisp.environment;
@@ -70,18 +72,22 @@ public {
             } else {
               *place.pintValue = cell.intValue;
             }
+	    break;
           case CellType.ctBFLOAT:
             if (cell.cellType != CellType.ctFLOAT) {
               throw new TypeState("Not a float", cell.pos);
             } else {
               *place.pfloatValue = cell.floatValue;
             }
+	    break;
           case CellType.ctBSTR:
             if (cell.cellType != CellType.ctSTR) {
               throw new TypeState("Not a string", cell.pos);
             } else {
               *place.pstrValue = cell.strValue;
             }
+	    break;
+	  default: enforce(false, "svn code bug!");
         }
       } else {
         if (cell) {

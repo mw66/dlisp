@@ -30,12 +30,12 @@ private {
 
 public {
     
-  Cell*[] evalArgs(DLisp dlisp, char[] fmt, Cell* args) {
+  Cell*[] evalArgs(DLisp dlisp, string fmt, Cell* args) {
     uint[] cnts;
     return evalArgs(dlisp, fmt, args, cnts);
   }
   
-  Cell*[] evalArgs(DLisp dlisp, char[] fmt, Cell* args, out uint[] cnts) {
+  Cell*[] evalArgs(DLisp dlisp, string fmt, Cell* args, out uint[] cnts) {
     // "yifscan" "'y+" 1 eller fler symboler, ingen eval."
     uint i, a, mincnt, maxcnt;
     Cell*[] ret, tret;
@@ -66,7 +66,7 @@ public {
       }
       mincnt = maxcnt = 1;
     }
-    bool tryArgs(char[] fmt) {
+    bool tryArgs(string fmt) {
       Cell* nargs = args;
       while (fmt != "") {
         if (!isCons(nargs)) {
@@ -131,7 +131,7 @@ public {
       return true;
     }
     for (i = 0; i < fmt.length; i++) {
-      char[] tfmt;
+      string tfmt;
       tfmt = "";
       tret.length = 0;
       if (fmt[i] == '(') {

@@ -34,8 +34,8 @@ public {
   
   class ReturnFromState : DLispState {
     Cell* value;
-    char[] block;
-    this(char[] msg, char[] block, Cell* value = null) {
+    string block;
+    this(string msg, string block, Cell* value = null) {
       this.block = block;
       this.value = value;
       super(msg);
@@ -44,7 +44,7 @@ public {
   
   class GoState : DLispState {
     Cell* tag;
-    this(char[] msg, Cell* tag) {
+    this(string msg, Cell* tag) {
       this.tag = tag;
       super(msg);
     }
@@ -54,14 +54,14 @@ public {
     Cell*[] args = evalArgs(dlisp, "'l'.*", cell.cdr);
     Cell*[] locs = evalArgs(dlisp, "'l+", args[0]);
     // Do this in paralell somehow :/
-    Cell*[char[]] vars;
+    Cell*[string] vars;
     foreach (Cell* pair; locs) {
       Cell*[] arg = evalArgs(dlisp, "'y.?", pair);
       vars[arg[0].name] = (arg.length == 2) ? arg[1] : null;
     }
     dlisp.environment.pushScope();
     try {
-      foreach(char[] name, Cell* value; vars) {
+      foreach(string name, Cell* value; vars) {
         dlisp.environment.addLocal(name, value);
       }
       for (uint i = 1; i < args.length; i++) {
@@ -146,7 +146,7 @@ start:
       }
     } catch (DLispState state) {
       bool isState(Cell* cell, DLispState state) {
-        foreach(char[] statename; state.stateNames()) {
+        foreach(string statename; state.stateNames()) {
           if (statename == cell.name) {
             return true;
           }

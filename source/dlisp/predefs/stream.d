@@ -26,9 +26,9 @@
 module dlisp.predefs.stream;
 
 private {
-  import std.stream;
+  import undead.stream;
   import std.string;
-  import std.cstream;
+  import undead.cstream;
 
   import dlisp.evalhelpers;
   import dlisp.dlisp;
@@ -39,7 +39,7 @@ public {
   Cell* evalOpen(DLisp dlisp, Cell* cell) {
     Cell*[] args = evalArgs(dlisp, "s", cell.cdr);
     try {
-      return newStream(new File(args[0].strValue, FileMode.In | FileMode.Out));
+      return newStream(new undead.stream.File(args[0].strValue, FileMode.In | FileMode.Out));
     } catch (Exception e) {
       throw new FileState("Could no open " ~ args[0].strValue);
     }
@@ -89,7 +89,7 @@ public {
       return null;
     }
     try {
-      return newStr(args[0].streamValue.readLine());
+      return newStr(cast(string)(args[0].streamValue.readLine()));
     } catch (Exception e) {
       throw new FileState("Could not read-line.");
     }
@@ -98,9 +98,9 @@ public {
   Cell* evalWrite(DLisp dlisp, Cell* cell) {
     Cell*[] args = evalArgs(dlisp, "t.+", cell.cdr);
     cell = args[0];
-    char[] sep = dlisp.eval(newSym("*SEP*")).strValue;
+    string sep = dlisp.eval(newSym("*SEP*")).strValue;
     for (uint i = 1; i < args.length; i++) {
-      char[] sout = cellToString(args[i]);
+      string sout = cellToString(args[i]);
       if (isString(args[i])) {
         sout = sout[1..$-1];
       }
@@ -116,7 +116,7 @@ public {
 
 public Environment addToEnvironment(Environment environment) {
   
-  environment["*STD-IN*"] = newStream(din);
+  environment["*STD-IN*" ] = newStream(din);
   environment["*STD-OUT*"] = newStream(dout);
   environment["*STD-ERR*"] = newStream(derr);
   
