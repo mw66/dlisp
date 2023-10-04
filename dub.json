@@ -11,5 +11,6 @@
 		"undead": "~>1.1.8"
 	},
 	"description": "DLisp is an implementation of a Lisp dialect written in D.",
+	"license": "LGPL-2.1",
 	"name": "dlisp"
 }
